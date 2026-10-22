@@ -51,6 +51,13 @@ exploring, unclear budget). Marketing follow-up, not sales.
 pricing, spam).
 - ESCALATE: you cannot decide responsibly from the data, or a wrong call would be costly.
 
+Intent: use buying_now only when the lead states a start date or timeline, says budget is \
+approved, or asks to start. A need or a budget alone is exploring, and a lead that is exploring \
+is not QUALIFY.
+
+The reason states only facts the lead wrote. Do not add urgency, approval or a service name \
+the lead did not write.
+
 The message may be in any language; judge it on its content.
 
 Reply with JSON only, no prose, exactly these keys:

@@ -27,6 +27,13 @@ def test_prompt_puts_lead_inside_a_random_boundary_block():
     assert "note one" in prompt.user[:begin]
 
 
+def test_system_prompt_ties_buying_now_to_a_stated_cue():
+    # Gemini run 1 gave L-016 and L-017 buying_now at 0.95 with no timeline or approval.
+    assert "buying_now only when the lead states a start date" in llm.SYSTEM_PROMPT
+    assert "exploring is not QUALIFY" in " ".join(llm.SYSTEM_PROMPT.split())
+    assert "facts the lead wrote" in llm.SYSTEM_PROMPT
+
+
 def test_boundary_is_random_per_call():
     lead = make_lead()
     assert llm.build_prompt(lead, []).boundary != llm.build_prompt(lead, []).boundary
