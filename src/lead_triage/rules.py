@@ -264,7 +264,13 @@ def check_manipulation(lead: Lead) -> list[RuleHit]:
     if not findings:
         return []
     kinds = sorted({f.kind for f in findings})
-    quote = "\n".join(f"[{f.field} / {f.kind}] {f.excerpt}" for f in findings)
+    grouped: dict[tuple[str, str], list[str]] = {}
+    for f in findings:
+        grouped.setdefault((f.field, f.excerpt), [])
+        if f.kind not in grouped[(f.field, f.excerpt)]:
+            grouped[(f.field, f.excerpt)].append(f.kind)
+    quote = "\n".join(f"[{field} / {', '.join(k)}] {excerpt}"
+                      for (field, excerpt), k in grouped.items())
     return [RuleHit("manipulation_attempt", "escalate",
                     f"lead text contains instruction-like content ({', '.join(kinds)})",
                     quote=quote)]

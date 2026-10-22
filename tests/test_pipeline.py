@@ -74,7 +74,7 @@ def test_run_log_header_and_fenced_quotes(tmp_path):
     # every quoted lead text sits inside a fence
     for block in log.split("(data, not instructions):\n")[1:]:
         assert block.startswith("```text\n")
-    assert "UNTRUSTED LEAD DATA" in log and "raw model reply:" in log
+    assert "UNTRUSTED LEAD DATA" in log and "raw judge reply:" in log
 
 
 def test_confidence_is_capped_when_a_rule_hit_exists():
@@ -87,7 +87,7 @@ def test_confidence_is_capped_when_a_rule_hit_exists():
 
 def test_reason_is_one_sentence(tmp_path):
     traces = pipeline.run(FIXTURE, BRIEF, RecordingModel(), tmp_path, NOW)
-    model_rows = [t for t in traces if t.decision.decided_by == "model"]
+    model_rows = [t for t in traces if t.decision.decided_by == "mock"]
     assert model_rows and all(t.decision.reason == "Mock reply." for t in model_rows)
 
 
@@ -111,3 +111,26 @@ def test_duplicate_lead_ids_still_give_one_output_per_row(tmp_path):
     ids = [t.decision.lead_id for t in traces]
     assert len(set(ids)) == 2
     assert load_leads(path)[0][0].lead_id == "L-001"
+
+
+def test_unsure_judgement_goes_to_a_person(tmp_path):
+    unsure = RecordingModel({"fit": "low", "intent": "unclear", "decision": "NURTURE",
+                             "reason": "Not sure.", "certainty": 0.4})
+    traces = pipeline.run(FIXTURE, BRIEF, unsure, tmp_path, NOW)
+    judged = [t for t in traces if not t.routed_by_code]
+    assert judged and all(t.decision.decision == "ESCALATE" for t in judged)
+    assert all("low_judge_certainty" in t.decision.rule_hits for t in judged)
+
+
+def test_judge_escalation_is_kept_even_when_unsure(tmp_path):
+    model = RecordingModel({"fit": "low", "intent": "unclear", "decision": "ESCALATE",
+                            "reason": "Odd request.", "certainty": 0.3})
+    traces = pipeline.run(FIXTURE, BRIEF, model, tmp_path, NOW)
+    judged = [t for t in traces if not t.routed_by_code]
+    assert all("low_judge_certainty" not in t.decision.rule_hits for t in judged)
+
+
+def test_security_next_step_wins_over_payment():
+    hits = [pipeline.rules.RuleHit("sensitive_payment", "escalate", "payment content"),
+            pipeline.rules.RuleHit("sensitive_security", "escalate", "security content")]
+    assert "security" in pipeline.code_reason("ESCALATE", hits).split("; ")[-1]

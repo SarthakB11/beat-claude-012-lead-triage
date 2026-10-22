@@ -18,6 +18,7 @@ SCANNED_FIELDS = ["name", "email", "company", "website", "monthly_budget_usd", "
 
 ZERO_WIDTH = re.compile("[​-‏‪-‮⁠-⁤﻿]")
 HTML_COMMENT = re.compile(r"<!--.*?(-->|$)", re.S)
+SENTENCE_END = re.compile(r"[.!?](?=\s|$)|\n")
 
 PATTERNS: list[tuple[str, re.Pattern[str]]] = [
     (
@@ -70,10 +71,12 @@ def make_visible(text: str) -> str:
 
 
 def _sentence_around(text: str, start: int, end: int, limit: int = 240) -> str:
-    left = max(text.rfind(c, 0, start) for c in ".!?\n")
-    right_candidates = [i for i in (text.find(c, end) for c in ".!?\n") if i != -1]
-    right = min(right_candidates) + 1 if right_candidates else len(text)
-    excerpt = text[left + 1 : right].strip()
+    # A sentence ends at . ! ? followed by whitespace or the end of the text, or at a
+    # newline, so "confidence 1.0" is not split at the decimal point.
+    boundaries = [m.end() for m in SENTENCE_END.finditer(text)]
+    left = max((b for b in boundaries if b <= start), default=0)
+    right = min((b for b in boundaries if b >= end), default=len(text))
+    excerpt = text[left:right].strip()
     if len(excerpt) > limit:
         excerpt = excerpt[:limit] + "..."
     return make_visible(excerpt)

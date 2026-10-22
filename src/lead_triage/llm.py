@@ -262,22 +262,25 @@ class OfflineJudge:
             return self._reply("low", "not_buying", "REJECT",
                                "Asks for pricing or method detail for a third party, which reads as "
                                "research rather than buying.", 0.6)
-        service = bool(self.SERVICE.search(text))
-        intent = bool(self.INTENT.search(text))
-        later = bool(self.LATER.search(text))
-        if budget is not None and budget >= QUALIFY_MIN_BUDGET and service and intent and not later:
+        service = self.SERVICE.search(text)
+        intent = self.INTENT.search(text)
+        later = self.LATER.search(text)
+        above_floor = budget is not None and budget >= QUALIFY_MIN_BUDGET
+        if above_floor and service and intent and not later:
             return self._reply("high", "buying_now", "QUALIFY",
-                               "Names a service the agency sells, a budget above the floor, and a "
-                               "near-term start.", 0.8)
-        if budget is not None and budget >= QUALIFY_MIN_BUDGET and service and not later:
+                               f"Budget {budget:.0f} USD/month is above the floor, the message names "
+                               f"'{service.group(0)}' and has the buying cue '{intent.group(0)}'.", 0.8)
+        if above_floor and service and not later:
             return self._reply("medium", "exploring", "QUALIFY",
-                               "Budget above the floor and a matching service, but no stated timeline.",
-                               0.6)
+                               f"Budget {budget:.0f} USD/month is above the floor and the message names "
+                               f"'{service.group(0)}', but no English buying cue was found.", 0.6)
         if service:
+            why = f"the timing cue '{later.group(0)}'" if later else "a budget below the floor or unknown"
             return self._reply("medium", "exploring", "NURTURE",
-                               "Relevant need but budget or timing is not ready for sales yet.", 0.7)
+                               f"Mentions '{service.group(0)}' but has {why}, so it is not ready "
+                               "for sales.", 0.7)
         return self._reply("low", "unclear", "NURTURE",
-                           "No clear match to a service the agency sells; keep warm.", 0.4)
+                           "No service keyword the judge knows was found in the message.", 0.4)
 
     @staticmethod
     def _reply(fit: str, intent: str, decision: str, reason: str, certainty: float) -> dict[str, object]:

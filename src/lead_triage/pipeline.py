@@ -14,6 +14,8 @@ from . import llm, rules
 from .schema import Lead, load_leads, read_brief_version, sha256_of
 
 CONFIDENCE_CAP_WITH_RULE_HIT = 0.6
+# A judgement the judge itself is unsure about goes to a person instead of the queue.
+MIN_JUDGE_CERTAINTY = 0.5
 CONFIDENCE_FLOOR, CONFIDENCE_CEILING = 0.05, 0.95
 
 NEXT_STEP = {
@@ -49,7 +51,7 @@ class Decision:
     reason: str
     confidence: float
     rule_hits: list[str]
-    decided_by: str  # "rules" | "model" | "model_error"
+    decided_by: str  # "rules", the judge backend name ("gemini", "offline"), or "model_error"
     fit: str | None = None
     intent: str | None = None
 
@@ -70,9 +72,24 @@ class RowTrace:
     extra: list[str] = field(default_factory=list)
 
 
+# When several rules fire, the next step comes from the most severe one.
+STEP_SEVERITY = ["sensitive_security", "sensitive_legal", "sensitive_privacy",
+                 "sensitive_third_party_personal_data", "sensitive_payment", "manipulation_attempt"]
+
+
+def next_step(deciding: list[rules.RuleHit]) -> str | None:
+    def rank(hit: rules.RuleHit) -> int:
+        return STEP_SEVERITY.index(hit.code) if hit.code in STEP_SEVERITY else len(STEP_SEVERITY)
+
+    for hit in sorted(deciding, key=rank):
+        if hit.code in NEXT_STEP:
+            return NEXT_STEP[hit.code]
+    return None
+
+
 def code_reason(decision: str, deciding: list[rules.RuleHit]) -> str:
     details = "; ".join(h.detail for h in deciding)
-    step = next((NEXT_STEP[h.code] for h in deciding if h.code in NEXT_STEP), None)
+    step = next_step(deciding)
     prefix = {"ESCALATE": "Escalated by rule", "REJECT": "Closed by rule"}[decision]
     sentence = f"{prefix}: {details}"
     if step:
@@ -142,9 +159,17 @@ def triage(leads: list[Lead], backend: llm.Backend, now: datetime) -> list[RowTr
                                               codes + ["model_reply_invalid"], "model_error")
                 else:
                     j = trace.judgement
-                    trace.decision = Decision(out_id, j.decision, first_sentence(j.reason),
-                                              model_confidence(lead, j.certainty, hits), codes,
-                                              "model", j.fit, j.intent)
+                    if j.certainty < MIN_JUDGE_CERTAINTY and j.decision != "ESCALATE":
+                        reason = (f"Judge was unsure ({j.decision} at certainty {j.certainty:.2f}, "
+                                  f"below {MIN_JUDGE_CERTAINTY}); a person should decide.")
+                        trace.decision = Decision(out_id, "ESCALATE", reason,
+                                                  model_confidence(lead, j.certainty, hits),
+                                                  codes + ["low_judge_certainty"], backend.name,
+                                                  j.fit, j.intent)
+                    else:
+                        trace.decision = Decision(out_id, j.decision, first_sentence(j.reason),
+                                                  model_confidence(lead, j.certainty, hits), codes,
+                                                  backend.name, j.fit, j.intent)
         traces.append(trace)
     return traces
 
@@ -192,10 +217,10 @@ def write_log(traces: list[RowTrace], header: dict[str, str], out_dir: Path) -> 
                          f"{', '.join(h.code for h in t.deciding)}; model not called")
         else:
             assert t.prompt and t.reply
-            lines.append(f"routing: sent to model {t.reply.backend}/{t.reply.model} "
+            lines.append(f"routing: sent to judge {t.reply.backend}/{t.reply.model} "
                          f"({t.seconds:.2f}s)")
             lines += ["", "prompt (user message, exact):", fence(t.prompt.user), "",
-                      "raw model reply:", fence(t.reply.raw if not t.reply.error
+                      "raw judge reply:", fence(t.reply.raw if not t.reply.error
                                                 else f"(no reply: {t.reply.error})")]
             if t.judgement:
                 j = t.judgement
@@ -215,7 +240,7 @@ def write_log(traces: list[RowTrace], header: dict[str, str], out_dir: Path) -> 
               f"rows: {len(traces)}",
               f"decisions: {', '.join(f'{k}={counts.get(k, 0)}' for k in llm.DECISIONS)}",
               f"decided by rules: {sum(1 for t in traces if t.routed_by_code)}",
-              f"sent to model: {sum(1 for t in traces if not t.routed_by_code)}",
+              f"sent to judge: {sum(1 for t in traces if not t.routed_by_code)}",
               f"finished_at: {datetime.now(UTC).isoformat(timespec='seconds')}", ""]
     (out_dir / "run.log").write_text("\n".join(lines), encoding="utf-8")
 
@@ -239,6 +264,7 @@ def run(fixture: Path, brief: Path | None, backend: llm.Backend, out_dir: Path,
         "schema_warnings": "; ".join(warnings) if warnings else "none",
         "confidence_cap_with_rule_hit": str(CONFIDENCE_CAP_WITH_RULE_HIT),
         "qualify_min_budget_usd_month": str(llm.QUALIFY_MIN_BUDGET),
+        "min_judge_certainty": str(MIN_JUDGE_CERTAINTY),
     }
     write_decisions(traces, out_dir)
     write_log(traces, header, out_dir)
