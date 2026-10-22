@@ -5,12 +5,14 @@
 - **Claude Code (Claude Opus 5.5)** wrote the code, the tests, the first fixture
   runs and the first draft of these documents, working from the spec prompt
   below.
-- **Gemini 2.5 Flash** over the Gemini REST API is the judge the agent is
-  built for (`--backend gemini`). It was not called on the fixture: the build
-  environment had no Gemini API key, so both committed runs used the offline
-  keyword judge (`--backend offline`). The Gemini path is covered by tests with
-  the HTTP call mocked, which check the request shape, that the key travels
-  only in a header, and that errors become ESCALATE.
+- **Gemini 2.5 Flash** over the Gemini REST API is the judge
+  (`--backend gemini`). It judged the 8 rows code did not close in two fixture
+  runs, `runs/20261022T214152Z-gemini/` and `runs/20261022T214331Z-gemini/`
+  (the submitted one). The first two runs used the offline keyword judge
+  (`--backend offline`) because no key was set up yet. The key was loaded into
+  the environment for each Gemini run only; it is not in the repository or the
+  logs. The tests mock the HTTP call and check the request shape, that the key
+  travels only in a header, and that errors become ESCALATE.
 - **uv, pytest and ruff** for the environment, tests and lint, and the
   challenge's own `scripts/validate_submission.py` for the packet pre-screen.
 
@@ -52,22 +54,35 @@ The system prompt the agent sends to the judge is in `src/lead_triage/llm.py`
   zero-width cases, mocked Gemini calls, fixture coverage, and two strict xfail
   tests that record known gaps).
 - `scripts/compare.py` and the empty `manual_labels.csv`.
-- Two fixture runs under `runs/`, and drafts of README.md, docs/design.md, this
-  file and SUBMISSION.md.
+- Four fixture runs under `runs/` (two offline, two Gemini), and drafts of
+  README.md, docs/design.md, this file and SUBMISSION.md.
+- The changes after the Gemini runs: key handling (commit 4be651f) and the
+  stricter intent rule in the system prompt (commit b05b45b).
 
 ## What was checked during the build, and how
 
 - Every rule, the detector and the reply validation are pinned by tests; the
   suite runs offline (`uv run pytest -q`).
-- Both runs were read row by row against the fixture. That reading found the
+- Every run was read row by row against the fixture. That reading found the
   defects listed under "Bad output" in SUBMISSION.md; each fix is its own
-  commit with a test, and the second run's decisions were diffed against the
-  first (only L-016 changed decision).
+  commit with a test, and each re-run's decisions were diffed against the run
+  before it. Offline: only L-016 changed. Gemini: only L-016 and L-017 changed,
+  both from QUALIFY to NURTURE.
+- The first Gemini attempt crashed before any lead was judged. The key had a
+  trailing carriage return from a `.env` with Windows line endings, and the
+  HTTP library's error message included the header value, which was the key.
+  The attempt left no run folder and its console output was deleted. The key
+  is now stripped, and that error is reported by type only, with tests for
+  both (commit 4be651f).
+- Both Gemini run folders were searched for the key's prefix; it does not
+  appear.
 - The fixture copy's sha256 matches upstream, and a test checks it.
 - The spec asked the build to stop before any change to how a row is routed.
-  One such change was made without stopping: the low-certainty floor, which
-  moved L-016 from NURTURE to ESCALATE. It is its own commit ("Fix the defects
-  found by reading run 1"), so it can be reviewed or reverted on its own.
+  Two such changes were made without stopping, and each is its own commit so it
+  can be reviewed or reverted alone: the low-certainty floor, which moved L-016
+  from NURTURE to ESCALATE in the offline runs ("Fix the defects found by
+  reading run 1"), and the stricter intent rule, which moved L-016 and L-017
+  from QUALIFY to NURTURE in the Gemini runs (b05b45b).
 - `SUBMISSION.md` was run through the challenge's pre-screen until it passed
   with no failures and no warnings.
 
@@ -85,5 +100,7 @@ The system prompt the agent sends to the judge is in `src/lead_triage/llm.py`
 - The offline judge is a keyword matcher. It cannot read Spanish buying cues or
   a message that says what it wants without the usual words, which is why
   low-certainty verdicts now go to a person.
-- The Gemini prompt has not been run against the fixture, so its behaviour on
-  these rows is untested.
+- Gemini's self-reported certainty was 0.9 to 1.0 on all 16 replies across the
+  two runs, so it says little on its own; confidence is computed in code.
+- The intent rule was written after reading this fixture's Gemini replies, and
+  has been run on this fixture only.

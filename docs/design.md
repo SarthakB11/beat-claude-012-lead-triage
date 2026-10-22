@@ -114,8 +114,17 @@ wrong answer.
 
 **Low-certainty floor.** If the judge reports certainty below 0.5 for a
 QUALIFY, NURTURE or REJECT, the row goes to a person. This was added after the
-first fixture run, where the offline judge nurtured a lead it did not
-understand (see SUBMISSION.md, bad output).
+first offline run, where the offline judge nurtured a lead it did not
+understand (see SUBMISSION.md, bad output). Gemini reported certainty between
+0.9 and 1.0 on every reply in both Gemini runs, so with Gemini the floor has
+not fired yet; it guards the offline judge and any reply that does admit doubt.
+
+**Intent needs a stated cue.** The prompt allows `buying_now` only when the
+lead states a start date or timeline, says budget is approved, or asks to
+start, and a lead that is only exploring is not QUALIFY. The reason may state
+only what the lead wrote. This was added after the first Gemini run, which
+qualified two leads (L-016, L-017) with a need and a budget but no timeline,
+and wrote reasons claiming intent and services the leads never mentioned.
 
 **Confidence is computed, not copied.** A model's self-reported certainty is
 poorly calibrated, so it is one input, not the answer. For judged rows,
@@ -132,15 +141,15 @@ in the run log header. Change `QUALIFY_MIN_BUDGET` in `llm.py` to move it.
 
 **An offline judge alongside Gemini.** The pipeline must run without network
 access or a key: for tests, for a reviewer without credentials, and for the
-build environment, which had no key. The offline judge answers in the same
+first two fixture runs, made before a key was set up. The offline judge answers in the same
 JSON format from keyword lists. It reads only the cleaned lead fields, never
 the prompt, so it cannot be steered, and it is deliberately simple. Its
 limits are visible in the run log, and one of them produced the bad output
 described in the submission.
 
 **Every run is kept.** Each run writes to its own folder under `runs/`. The
-first fixture run is committed as produced, next to the run after the fixes,
-so the before and after can be compared line by line.
+first run with each judge is committed as produced, next to the run after the
+fixes, so the before and after can be compared line by line.
 
 **Scope.** No database, no queue, no web UI, no CRM integration. The brief
 asks for a working first pass over a 20-row file in a couple of hours. The

@@ -27,7 +27,8 @@ uv run triage --backend offline
 That writes `runs/<UTC timestamp>-offline/` with `decisions.csv`,
 `decisions.json` and `run.log`. To use the real model, put the key in the
 environment (or in a `.env` file in the repo root, which git ignores) and drop
-the flag:
+the flag. Surrounding whitespace in the key, such as a carriage return from a
+Windows `.env`, is stripped:
 
 ```bash
 export GEMINI_API_KEY=...   # never committed, never logged
@@ -53,9 +54,12 @@ stamp, which goes into the log header next to the fixture's sha256.
   a fenced block, the exact prompt sent, the raw reply, the parsed fields and
   the final decision.
 - `runs/<id>/decisions.csv` and `decisions.json`: one entry per lead_id.
-- `runs/20261022T171209Z-offline/`: the first fixture run, kept as produced.
-- `runs/20261022T171335Z-offline/`: the run after fixing what the first one
-  got wrong. SUBMISSION.md describes both.
+- `runs/20261022T214331Z-gemini/`: the submitted run, Gemini 2.5 Flash after
+  the intent fix.
+- `runs/20261022T214152Z-gemini/`: the first Gemini run, kept as produced.
+- `runs/20261022T171209Z-offline/` and `runs/20261022T171335Z-offline/`: the
+  two earlier runs with the offline judge, before and after their fixes.
+  SUBMISSION.md describes all four.
 
 ## Tests and checks
 
