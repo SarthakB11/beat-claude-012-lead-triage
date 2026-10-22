@@ -97,6 +97,35 @@ def test_gemini_backend_reports_http_errors(monkeypatch):
     assert reply.error == "HTTP 403" and reply.raw == ""
 
 
+def test_gemini_backend_strips_a_trailing_carriage_return_from_the_key(monkeypatch):
+    # Found on the first real run: a .env with CRLF endings left "\r" on the key.
+    monkeypatch.setenv("GEMINI_API_KEY", "test-key-not-real\r")
+    seen = {}
+
+    def fake_urlopen(request, timeout):
+        seen["key"] = dict(request.header_items())["X-goog-api-key"]
+        body = {"candidates": [{"content": {"parts": [{"text": json.dumps(GOOD)}]}}]}
+        return FakeResponse(json.dumps(body).encode())
+
+    monkeypatch.setattr(llm.urllib.request, "urlopen", fake_urlopen)
+    reply = llm.GeminiBackend().complete(llm.build_prompt(make_lead(), []), make_lead())
+    assert reply.error is None and seen["key"] == "test-key-not-real"
+
+
+def test_gemini_backend_error_never_carries_the_key(monkeypatch):
+    monkeypatch.setenv("GEMINI_API_KEY", "test-key-not-real")
+    calls = []
+
+    def bad_header(request, timeout):
+        calls.append(1)
+        raise ValueError("Invalid header value b'test-key-not-real\\r'")
+
+    monkeypatch.setattr(llm.urllib.request, "urlopen", bad_header)
+    reply = llm.GeminiBackend(retries=3).complete(llm.build_prompt(make_lead(), []), make_lead())
+    assert reply.error == "ValueError" and "test-key-not-real" not in reply.error
+    assert len(calls) == 1
+
+
 def test_gemini_backend_needs_a_key(monkeypatch):
     monkeypatch.delenv("GEMINI_API_KEY", raising=False)
     with pytest.raises(RuntimeError, match="GEMINI_API_KEY"):

@@ -174,6 +174,12 @@ class Backend(Protocol):
     def complete(self, prompt: Prompt, lead: Lead) -> ModelReply: ...
 
 
+def _api_key() -> str:
+    # A key read from a .env with Windows line endings keeps a trailing "\r", which
+    # http.client rejects as an invalid header value. Strip surrounding whitespace.
+    return os.environ.get("GEMINI_API_KEY", "").strip()
+
+
 class GeminiBackend:
     name = "gemini"
     endpoint = "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
@@ -182,7 +188,7 @@ class GeminiBackend:
         self.model = model
         self.timeout = timeout
         self.retries = retries
-        if not os.environ.get("GEMINI_API_KEY"):
+        if not _api_key():
             raise RuntimeError("GEMINI_API_KEY is not set; use --backend offline or export the key")
 
     def complete(self, prompt: Prompt, lead: Lead) -> ModelReply:
@@ -200,7 +206,7 @@ class GeminiBackend:
             data=json.dumps(body).encode(),
             headers={
                 "Content-Type": "application/json",
-                "x-goog-api-key": os.environ["GEMINI_API_KEY"],
+                "x-goog-api-key": _api_key(),
             },
             method="POST",
         )
@@ -217,6 +223,11 @@ class GeminiBackend:
                     break
             except (urllib.error.URLError, TimeoutError, KeyError, IndexError, json.JSONDecodeError) as exc:
                 last_error = type(exc).__name__
+            except ValueError as exc:
+                # http.client puts the bad header value in the message, and that value is
+                # the key. Report the type only, and do not retry a request that cannot work.
+                last_error = type(exc).__name__
+                break
             time.sleep(2 * (attempt + 1))
         return ModelReply("", self.name, self.model, error=last_error or "unknown error")
 
