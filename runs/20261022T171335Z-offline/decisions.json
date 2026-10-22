@@ -1,0 +1,238 @@
+[
+  {
+    "lead_id": "L-001",
+    "decision": "QUALIFY",
+    "reason": "Budget 25000 USD/month is above the floor, the message names 'paid' and has the buying cue 'want an agency'.",
+    "confidence": 0.8,
+    "rule_hits": [],
+    "decided_by": "offline",
+    "fit": "high",
+    "intent": "buying_now"
+  },
+  {
+    "lead_id": "L-002",
+    "decision": "REJECT",
+    "reason": "Reads as a personal or career request, not a buyer of agency services.",
+    "confidence": 0.64,
+    "rule_hits": [],
+    "decided_by": "offline",
+    "fit": "none",
+    "intent": "not_buying"
+  },
+  {
+    "lead_id": "L-003",
+    "decision": "REJECT",
+    "reason": "Closed by rule: duplicate of L-001 (same email); merge its note into L-001.",
+    "confidence": 0.5,
+    "rule_hits": [
+      "duplicate_of"
+    ],
+    "decided_by": "rules",
+    "fit": null,
+    "intent": null
+  },
+  {
+    "lead_id": "L-004",
+    "decision": "ESCALATE",
+    "reason": "Escalated by rule: required field 'email' is empty; find a contact route before any follow-up.",
+    "confidence": 0.6,
+    "rule_hits": [
+      "missing_email"
+    ],
+    "decided_by": "rules",
+    "fit": null,
+    "intent": null
+  },
+  {
+    "lead_id": "L-005",
+    "decision": "NURTURE",
+    "reason": "Mentions 'lead gen' but has the timing cue 'Not sure', so it is not ready for sales.",
+    "confidence": 0.6,
+    "rule_hits": [
+      "budget_not_numeric"
+    ],
+    "decided_by": "offline",
+    "fit": "medium",
+    "intent": "exploring"
+  },
+  {
+    "lead_id": "L-006",
+    "decision": "ESCALATE",
+    "reason": "Escalated by rule: lead text contains instruction-like content (confidence_directive, decision_directive, decision_vocabulary, instruction_override); a person should judge it on its merits.",
+    "confidence": 0.6,
+    "rule_hits": [
+      "conflict_budget_vs_size",
+      "manipulation_attempt"
+    ],
+    "decided_by": "rules",
+    "fit": null,
+    "intent": null
+  },
+  {
+    "lead_id": "L-007",
+    "decision": "ESCALATE",
+    "reason": "Escalated by rule: stated budget 50 USD/month contradicts 12,000 employees; confirm budget and company size with the lead.",
+    "confidence": 0.5,
+    "rule_hits": [
+      "conflict_budget_vs_size"
+    ],
+    "decided_by": "rules",
+    "fit": null,
+    "intent": null
+  },
+  {
+    "lead_id": "L-008",
+    "decision": "ESCALATE",
+    "reason": "Escalated by rule: 40000 USD/month claimed from a free webmail address with no company named; verify the person and company before sales time is spent.",
+    "confidence": 0.5,
+    "rule_hits": [
+      "unverifiable_high_value"
+    ],
+    "decided_by": "rules",
+    "fit": null,
+    "intent": null
+  },
+  {
+    "lead_id": "L-009",
+    "decision": "QUALIFY",
+    "reason": "Budget 18000 USD/month is above the floor and the message names 'SEO', but no English buying cue was found.",
+    "confidence": 0.6,
+    "rule_hits": [],
+    "decided_by": "offline",
+    "fit": "medium",
+    "intent": "exploring"
+  },
+  {
+    "lead_id": "L-010",
+    "decision": "REJECT",
+    "reason": "Closed by rule: test or junk values in name, email, company, message, budget.",
+    "confidence": 0.5,
+    "rule_hits": [
+      "placeholder_email",
+      "implausible_budget",
+      "test_submission"
+    ],
+    "decided_by": "rules",
+    "fit": null,
+    "intent": null
+  },
+  {
+    "lead_id": "L-011",
+    "decision": "REJECT",
+    "reason": "Asks for pricing or method detail for a third party, which reads as research rather than buying.",
+    "confidence": 0.6,
+    "rule_hits": [],
+    "decided_by": "offline",
+    "fit": "low",
+    "intent": "not_buying"
+  },
+  {
+    "lead_id": "L-012",
+    "decision": "ESCALATE",
+    "reason": "Escalated by rule: submitted_at '2026-13-45T99:99:00Z' is not a valid date and time; fix the record, then triage it.",
+    "confidence": 0.6,
+    "rule_hits": [
+      "malformed_timestamp"
+    ],
+    "decided_by": "rules",
+    "fit": null,
+    "intent": null
+  },
+  {
+    "lead_id": "L-013",
+    "decision": "ESCALATE",
+    "reason": "Escalated by rule: email uses the disposable inbox domain mailinator.com; ask for a work address before sharing anything.",
+    "confidence": 0.6,
+    "rule_hits": [
+      "disposable_email"
+    ],
+    "decided_by": "rules",
+    "fit": null,
+    "intent": null
+  },
+  {
+    "lead_id": "L-014",
+    "decision": "NURTURE",
+    "reason": "Mentions 'SEO' but has the timing cue 'Pre-seed', so it is not ready for sales.",
+    "confidence": 0.7,
+    "rule_hits": [],
+    "decided_by": "offline",
+    "fit": "medium",
+    "intent": "exploring"
+  },
+  {
+    "lead_id": "L-015",
+    "decision": "ESCALATE",
+    "reason": "Escalated by rule: same sender as L-002 but budget 0 vs 2500 USD/month; a person should reconcile the two submissions.",
+    "confidence": 0.5,
+    "rule_hits": [
+      "conflicting_repeat_submission"
+    ],
+    "decided_by": "rules",
+    "fit": null,
+    "intent": null
+  },
+  {
+    "lead_id": "L-016",
+    "decision": "ESCALATE",
+    "reason": "Judge was unsure (NURTURE at certainty 0.40, below 0.5); a person should decide.",
+    "confidence": 0.4,
+    "rule_hits": [
+      "markup_in_message",
+      "low_judge_certainty"
+    ],
+    "decided_by": "offline",
+    "fit": "low",
+    "intent": "unclear"
+  },
+  {
+    "lead_id": "L-017",
+    "decision": "QUALIFY",
+    "reason": "Budget 15000 USD/month is above the floor, the message names 'demand gen' and has the buying cue 'We need'.",
+    "confidence": 0.6,
+    "rule_hits": [
+      "budget_shorthand"
+    ],
+    "decided_by": "offline",
+    "fit": "high",
+    "intent": "buying_now"
+  },
+  {
+    "lead_id": "L-018",
+    "decision": "ESCALATE",
+    "reason": "Escalated by rule: required field 'message' is empty; a person should look up the company and reach out.",
+    "confidence": 0.6,
+    "rule_hits": [
+      "missing_message"
+    ],
+    "decided_by": "rules",
+    "fit": null,
+    "intent": null
+  },
+  {
+    "lead_id": "L-019",
+    "decision": "ESCALATE",
+    "reason": "Escalated by rule: privacy content ('personal data'); route to whoever handles data requests.",
+    "confidence": 0.6,
+    "rule_hits": [
+      "placeholder_email",
+      "sensitive_privacy"
+    ],
+    "decided_by": "rules",
+    "fit": null,
+    "intent": null
+  },
+  {
+    "lead_id": "L-020",
+    "decision": "ESCALATE",
+    "reason": "Escalated by rule: payment content ('overdue'); security content ('Download the attached'); do not open any link and send it to security.",
+    "confidence": 0.6,
+    "rule_hits": [
+      "sensitive_payment",
+      "sensitive_security"
+    ],
+    "decided_by": "rules",
+    "fit": null,
+    "intent": null
+  }
+]

@@ -1,0 +1,21 @@
+lead_id,decision,reason,confidence,rule_hits,decided_by
+L-001,QUALIFY,"Budget 25000 USD/month is above the floor, the message names 'paid' and has the buying cue 'want an agency'.",0.80,,offline
+L-002,REJECT,"Reads as a personal or career request, not a buyer of agency services.",0.64,,offline
+L-003,REJECT,Closed by rule: duplicate of L-001 (same email); merge its note into L-001.,0.50,duplicate_of,rules
+L-004,ESCALATE,Escalated by rule: required field 'email' is empty; find a contact route before any follow-up.,0.60,missing_email,rules
+L-005,NURTURE,"Mentions 'lead gen' but has the timing cue 'Not sure', so it is not ready for sales.",0.60,budget_not_numeric,offline
+L-006,ESCALATE,"Escalated by rule: lead text contains instruction-like content (confidence_directive, decision_directive, decision_vocabulary, instruction_override); a person should judge it on its merits.",0.60,conflict_budget_vs_size;manipulation_attempt,rules
+L-007,ESCALATE,"Escalated by rule: stated budget 50 USD/month contradicts 12,000 employees; confirm budget and company size with the lead.",0.50,conflict_budget_vs_size,rules
+L-008,ESCALATE,Escalated by rule: 40000 USD/month claimed from a free webmail address with no company named; verify the person and company before sales time is spent.,0.50,unverifiable_high_value,rules
+L-009,QUALIFY,"Budget 18000 USD/month is above the floor and the message names 'SEO', but no English buying cue was found.",0.60,,offline
+L-010,REJECT,"Closed by rule: test or junk values in name, email, company, message, budget.",0.50,placeholder_email;implausible_budget;test_submission,rules
+L-011,REJECT,"Asks for pricing or method detail for a third party, which reads as research rather than buying.",0.60,,offline
+L-012,ESCALATE,"Escalated by rule: submitted_at '2026-13-45T99:99:00Z' is not a valid date and time; fix the record, then triage it.",0.60,malformed_timestamp,rules
+L-013,ESCALATE,Escalated by rule: email uses the disposable inbox domain mailinator.com; ask for a work address before sharing anything.,0.60,disposable_email,rules
+L-014,NURTURE,"Mentions 'SEO' but has the timing cue 'Pre-seed', so it is not ready for sales.",0.70,,offline
+L-015,ESCALATE,Escalated by rule: same sender as L-002 but budget 0 vs 2500 USD/month; a person should reconcile the two submissions.,0.50,conflicting_repeat_submission,rules
+L-016,ESCALATE,"Judge was unsure (NURTURE at certainty 0.40, below 0.5); a person should decide.",0.40,markup_in_message;low_judge_certainty,offline
+L-017,QUALIFY,"Budget 15000 USD/month is above the floor, the message names 'demand gen' and has the buying cue 'We need'.",0.60,budget_shorthand,offline
+L-018,ESCALATE,Escalated by rule: required field 'message' is empty; a person should look up the company and reach out.,0.60,missing_message,rules
+L-019,ESCALATE,Escalated by rule: privacy content ('personal data'); route to whoever handles data requests.,0.60,placeholder_email;sensitive_privacy,rules
+L-020,ESCALATE,Escalated by rule: payment content ('overdue'); security content ('Download the attached'); do not open any link and send it to security.,0.60,sensitive_payment;sensitive_security,rules
