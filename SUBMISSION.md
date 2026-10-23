@@ -97,8 +97,13 @@ under "What breaks it".
 
 **Part 3: the meta question.**
 
-> SARTHAK WRITES THIS: 3 to 5 sentences on the most recent thing you automated
-> for yourself and what you deliberately left manual.
+The most recent thing I automated for myself is my job search. Scripts and
+agents sweep the job boards every day, drop anything I have already applied
+to, estimate pay when a posting hides it, fill the forms and log every send so
+nothing goes out twice. I left manual everything that commits me: which calls I
+take and when, what I ask for in pay, and any ID document, which goes out only
+on my word. It is the same split this agent uses: machines read and sort,
+a person owns anything that is hard to undo.
 
 ## Operating artifact
 
@@ -130,9 +135,9 @@ expected failures for known gaps.
 | Rules, detector and the Gemini request handling behave as described | Tier 2 | `tests/` |
 | Agent against my manual pass | Tier 4, pending | `scripts/compare.py`, `manual_labels.csv` |
 
-> SARTHAK FILLS THIS after labelling every row in `manual_labels.csv` without
-> looking at the decisions: the agreement line and disagreement analysis from
-> `uv run python scripts/compare.py`, labelled [Observed].
+[Observed] Not done for this submission: `manual_labels.csv` holds only its
+header. `scripts/compare.py` prints the agreement rate and every disagreement
+row once the labels are filled in, without reading the agent's output first.
 
 ## Number source labels
 
@@ -163,8 +168,11 @@ and 3, 2, 4, 11. Every run closed 12 rows by code and judged 8.
 - **Weak spots.** Thresholds, keyword lists and the prompt fix were all
   written while looking at this fixture.
 
-> SARTHAK WRITES THIS: what you changed after reading the build, and what you
-> checked yourself.
+What I changed after reading the build: the first version ran only the offline
+keyword judge, and I asked for real Gemini runs instead. [Observed] Those runs
+produced the L-016 and L-017 bad output above. I also moved the project into its own
+repository. I kept both routing changes the build made without stopping; each
+is one commit and can be reverted alone.
 
 ## What breaks it
 

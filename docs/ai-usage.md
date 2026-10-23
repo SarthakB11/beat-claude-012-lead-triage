@@ -88,9 +88,15 @@ The system prompt the agent sends to the judge is in `src/lead_triage/llm.py`
 
 ## What I changed and what I checked myself
 
-> SARTHAK WRITES THIS: what you changed after reading the build, and what you
-> checked yourself (for example the manual labelling pass and any rows you
-> re-read against the fixture).
+- The first build ran only the offline keyword judge. I asked for real Gemini
+  runs, with the key loaded from my environment at run time and never written
+  to the repository. Those runs found the L-016 and L-017 bad output.
+- I moved the project into its own repository.
+- I kept both routing changes made without the agreed stop (the certainty
+  floor and the stricter intent rule). Each is one commit and can be reverted
+  alone.
+- The manual labelling pass (Tier 4) is not done yet: `manual_labels.csv`
+  holds only its header.
 
 ## Known weak spots in the AI-produced work
 
