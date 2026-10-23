@@ -1,4 +1,4 @@
-# lead-triage-agent
+# Beat Claude 012: lead triage agent
 
 First-pass triage for inbound marketing leads. It reads a CSV of web-form
 leads and gives every row one of four decisions (QUALIFY, NURTURE, REJECT,

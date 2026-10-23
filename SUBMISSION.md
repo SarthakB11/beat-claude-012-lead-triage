@@ -5,7 +5,7 @@ Brief version: 2026-07
 [Observed] Fixture `fixtures/inbound_leads.csv`, sha256
 `cc1927ca771c37b186a2abdb7b9757594da79ec6dda074e5a514dd2761cc8599`, copied
 unmodified from the challenge repository at commit 4b719e4. Repository:
-https://github.com/SarthakB11/lead-triage-agent
+https://github.com/SarthakB11/beat-claude-012-lead-triage
 
 ## Written answer
 
@@ -108,11 +108,11 @@ a person owns anything that is hard to undo.
 ## Operating artifact
 
 Artifact access: the public repository
-https://github.com/SarthakB11/lead-triage-agent. The offline run needs no
+https://github.com/SarthakB11/beat-claude-012-lead-triage. The offline run needs no
 login and no key; the Gemini run needs `GEMINI_API_KEY` in the environment.
 
 ```bash
-git clone https://github.com/SarthakB11/lead-triage-agent && cd lead-triage-agent
+git clone https://github.com/SarthakB11/beat-claude-012-lead-triage && cd beat-claude-012-lead-triage
 uv sync && uv run triage --backend offline    # writes runs/<timestamp>-offline/
 GEMINI_API_KEY=... uv run triage              # writes runs/<timestamp>-gemini/
 uv run pytest -q                              # offline, model mocked
@@ -160,7 +160,7 @@ and 3, 2, 4, 11. Every run closed 12 rows by code and judged 8.
 - **What I decided.** The design, fixed in a spec prompt I approved before
   any code: rules first, no judge for rows code routed, the detector, the
   confidence cap, the manual pass. Prompt and checks:
-  https://github.com/SarthakB11/lead-triage-agent/blob/main/docs/ai-usage.md
+  https://github.com/SarthakB11/beat-claude-012-lead-triage/blob/main/docs/ai-usage.md
 - **Steps the build took on its own.** [Observed] The prompt asked the build
   to stop before any routing change. Two changes went ahead without that
   stop: the certainty floor and the stricter intent rule. Each is its own
