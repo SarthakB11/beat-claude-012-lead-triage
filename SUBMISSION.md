@@ -133,11 +133,15 @@ expected failures for known gaps.
 | Gemini's verdicts on the 8 judged rows, raw replies kept | Tier 3 | Both `*-gemini/run.log` files |
 | A real bad output from Gemini found and fixed | Tier 3 | Gemini run 1 and 2 logs; commit b05b45b |
 | Rules, detector and the Gemini request handling behave as described | Tier 2 | `tests/` |
-| Agent against my manual pass | Tier 4, pending | `scripts/compare.py`, `manual_labels.csv` |
+| Agent against a blind labelling pass, before and after the intent fix | Tier 4 | `blind_labels_haiku.csv`, `scripts/compare.py` |
 
-[Observed] Not done for this submission: `manual_labels.csv` holds only its
-header. `scripts/compare.py` prints the agreement rate and every disagreement
-row once the labels are filled in, without reading the agent's output first.
+**Blind labelling pass.** Claude Haiku, not me, labelled the 20 rows in an
+empty folder with only the fixture and a task sheet (`blind_labels_haiku.csv`).
+[Observed] It agrees with Gemini run 1 on 19 of 20 and with run 2 on 17 of 20:
+L-011 (it escalates a possible competitor) and L-016, L-017, which it would
+send to sales while my intent fix holds them for lack of a timeline. The fix
+removed invented reasons but moved two rows away from an independent reader;
+budget without a timeline is a policy call for sales. I kept the stricter rule.
 
 ## Number source labels
 

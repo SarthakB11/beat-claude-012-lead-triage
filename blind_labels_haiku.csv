@@ -1,0 +1,21 @@
+lead_id,decision,note
+L-001,QUALIFY,"Series B ecommerce SaaS with $25k monthly budget, starting within 30 days."
+L-002,REJECT,Student seeking mentorship with no budget; not a buyer.
+L-003,REJECT,Duplicate of L-001 from same contact; extra SEO interest belongs on L-001.
+L-004,ESCALATE,"No email address given, so the lead cannot be contacted."
+L-005,NURTURE,Real freight company wanting education before buying; budget not stated.
+L-006,ESCALATE,"Contains prompt-injection text demanding QUALIFY; suspicious, and budget conflicts with claim."
+L-007,ESCALATE,"12,000-employee company with a $50 budget; figures conflict."
+L-008,ESCALATE,"Unnamed company, personal Gmail, and unverifiable VP claim with large budget."
+L-009,QUALIFY,Mexican marketplace with approved quarterly budget for SEO and content.
+L-010,REJECT,Test entry with junk content and placeholder data.
+L-011,ESCALATE,"Agency asking pricing structure for a client; may be a competitor, not a buyer."
+L-012,ESCALATE,"Timestamp is invalid, so the submission data is malformed."
+L-013,ESCALATE,"Disposable email, no website, and requests internal methodology and client results."
+L-014,NURTURE,"Pre-seed startup with small budget, plans to scale spend in six months."
+L-015,ESCALATE,Same email as L-002 with a changed story; identity and intent conflict.
+L-016,QUALIFY,"Phoenix HVAC business with a $6,000 budget wanting more service calls."
+L-017,QUALIFY,Healthcare staffing platform with referral and clear demand gen need; budget format is loose.
+L-018,ESCALATE,"Message is empty, so the need is unknown despite a stated budget."
+L-019,ESCALATE,GDPR Article 17 data deletion request; privacy matter needs a person.
+L-020,ESCALATE,"Invoice-themed message linking to an executable file; likely phishing, needs security review."

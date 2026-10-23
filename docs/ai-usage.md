@@ -95,8 +95,10 @@ The system prompt the agent sends to the judge is in `src/lead_triage/llm.py`
 - I kept both routing changes made without the agreed stop (the certainty
   floor and the stricter intent rule). Each is one commit and can be reverted
   alone.
-- The manual labelling pass (Tier 4) is not done yet: `manual_labels.csv`
-  holds only its header.
+- I did not hand-label the rows. Instead Claude Haiku labelled them blind: an
+  empty folder with only the fixture and a neutral task sheet, strict
+  instructions to read those two files and nothing else
+  (`blind_labels_haiku.csv`). `manual_labels.csv` stays empty for a human pass.
 
 ## Known weak spots in the AI-produced work
 
